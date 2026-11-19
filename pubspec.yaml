@@ -1,35 +1,18 @@
-name: Build APK
+name: borah_electricals
+description: Borah Electricals Home Care
+publish_to: 'none'
+version: 1.0.0+1
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+environment:
+  sdk: '>=3.5.0 <4.0.0'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+dependencies:
+  flutter:
+    sdk: flutter
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Android folder banao
-        run: |
-          rm -rf android
-          flutter create --platforms=android --org com.borah --project-name borah_electricals .
-
-      - run: flutter pub get
-
-      - run: flutter build apk --release
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: borah-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+flutter:
+  uses-material-design: true
