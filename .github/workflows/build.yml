@@ -8,6 +8,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: customer
+            label: "Borah Customer"
+          - app: technician
+            label: "Borah Technician"
+          - app: owner
+            label: "Borah Owner"
     steps:
       - uses: actions/checkout@v4
 
@@ -24,12 +34,19 @@ jobs:
         run: |
           rm -rf android
           flutter create --platforms=android --org com.borah --project-name borah_electricals .
+          APP=${{ matrix.app }}
+          sed -i "s/applicationId = \"[^\"]*\"/applicationId = \"com.borah.$APP\"/; s/applicationId \"[^\"]*\"/applicationId \"com.borah.$APP\"/" android/app/build.gradle*
+          sed -i "s/minSdk = flutter.minSdkVersion/minSdk = 23/; s/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/" android/app/build.gradle*
+          sed -i 's/android:label="[^"]*"/android:label="${{ matrix.label }}"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Firebase packages jodo
+        run: flutter pub add firebase_core cloud_firestore
 
       - run: flutter pub get
 
-      - run: flutter build apk --release
+      - run: flutter build apk --release -t lib/main_${{ matrix.app }}.dart
 
       - uses: actions/upload-artifact@v4
         with:
-          name: borah-apk
+          name: borah-${{ matrix.app }}
           path: build/app/outputs/flutter-apk/app-release.apk
